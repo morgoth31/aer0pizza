@@ -78,9 +78,6 @@ class Car(pygame.sprite.Sprite):
         except pygame.error as e:
             print(f"Error loading pickup sound: {e}")
 
-        # NOUVEAU: Police pour l'affichage des coordonnées (sera utilisée dans main.py)
-        # self.font = pygame.font.Font(None, COORD_FONT_SIZE) # Removed from here
-
 
     def create_pizza_slice_surface(self, width, length, color):
         """Creates a Pygame surface with a pizza slice shape."""
@@ -319,6 +316,7 @@ class Car(pygame.sprite.Sprite):
             temp_image.fill((255, 255, 255, 128), None, pygame.BLEND_RGBA_MULT) # Applique une transparence
             screen.blit(temp_image, self.rect)
         else:
+            # --- RETOUR À L'AFFICHAGE NORMAL DE LA VOITURE ---
             screen.blit(self.image, self.rect)
 
         # Dessiner la barre de vie (même si désactivée pour montrer le timer ou l'état)
@@ -337,8 +335,5 @@ class Car(pygame.sprite.Sprite):
         if self.is_disabled:
             font_timer = pygame.font.Font(None, 24)
             timer_text = font_timer.render(f"{self.disabled_timer:.1f}s", True, WHITE)
+            # CORRECTION: timer_timer -> timer_text
             screen.blit(timer_text, timer_text.get_rect(center=(self.rect.centerx, self.rect.top - 15)))
-
-        # NOUVEAU: Afficher les coordonnées de la voiture (sera déplacé dans main.py)
-        # coord_text = self.font.render(f"({int(self.position.x)}, {int(self.position.y)})", True, WHITE)
-        # screen.blit(coord_text, coord_text.get_rect(center=(self.rect.centerx, self.rect.bottom + 15)))

@@ -15,6 +15,7 @@ YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
 DARK_GRAY = (200, 200, 200) # Track color - Changed to a lighter gray for better visibility of red AI cars
 WALL_COLOR = (70, 70, 70) # Wall color
+MAGENTA = (255, 0, 255) # NOUVEAU: Couleur pour le débogage des IA
 
 # --- Car Parameters ---
 CAR_WIDTH = 40  # Largeur de la base de la "part de pizza"
@@ -47,7 +48,7 @@ HEALTH_PICKUP_MAX_HP = 15 # Points de vie maximum récupérés par un bonus
 HEALTH_PICKUP_RADIUS = 15 # Rayon du cercle du bonus de vie
 
 # --- Display Parameters ---
-COORD_FONT_SIZE = 18 # NOUVEAU: Taille de la police pour les coordonnées
+COORD_FONT_SIZE = 18 # Taille de la police pour les coordonnées
 
 # --- Sounds ---
 # Path to sound files (adapt by user)

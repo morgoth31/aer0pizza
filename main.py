@@ -122,10 +122,26 @@ def game_loop():
 
     # Dynamic initial car placement
     # Calculate spawn area (inside inner track)
-    spawn_min_x = 150 + CAR_LENGTH
-    spawn_max_x = SCREEN_WIDTH - 150 - CAR_LENGTH
-    spawn_min_y = 150 + CAR_LENGTH
-    spawn_max_y = SCREEN_HEIGHT - 150 - CAR_LENGTH
+    track_inner_left = 150 + CAR_LENGTH
+    track_inner_right = SCREEN_WIDTH - 150 - CAR_LENGTH
+    track_inner_top = 150 + CAR_LENGTH
+    track_inner_bottom = SCREEN_HEIGHT - 150 - CAR_LENGTH
+
+    # Define a smaller, more central spawn area for AIs
+    ai_spawn_width = (track_inner_right - track_inner_left) * 0.6 # 60% of inner track width
+    ai_spawn_height = (track_inner_bottom - track_inner_top) * 0.6 # 60% of inner track height
+
+    ai_spawn_center_x = SCREEN_WIDTH // 2
+    ai_spawn_center_y = SCREEN_HEIGHT // 2
+
+    ai_spawn_min_x = int(ai_spawn_center_x - ai_spawn_width / 2)
+    print(ai_spawn_min_x)
+    ai_spawn_max_x = int(ai_spawn_center_x + ai_spawn_width / 2)
+    print(ai_spawn_max_x)
+    ai_spawn_min_y = int(ai_spawn_center_y - ai_spawn_height / 2)
+    print(ai_spawn_min_y)
+    ai_spawn_max_y = int(ai_spawn_center_y + ai_spawn_height / 2)
+    print(ai_spawn_max_y)
 
     # Place player cars
     # Player 1 (Blue)
@@ -134,11 +150,13 @@ def game_loop():
         # Player 2 (Green)
         player_cars.append(Car(SCREEN_WIDTH // 2 + CAR_WIDTH, SCREEN_HEIGHT // 2 - CAR_LENGTH * 2, angle=0, color=GREEN, is_player=True))
 
-    # Place AI cars randomly within the track boundaries, avoiding initial player positions
+    # Place AI cars randomly within the defined AI spawn area, avoiding initial player positions
     for i in range(ai_count):
         while True:
-            x = random.randint(spawn_min_x, spawn_max_x)
-            y = random.randint(spawn_min_y, spawn_max_y)
+            
+            x = random.randint(ai_spawn_min_x, ai_spawn_max_x)
+            y = random.randint(ai_spawn_min_y, ai_spawn_max_y)
+            print(f"Attempting to spawn AI Car {i+1} x={x}, y={y}")
             new_pos = pygame.math.Vector2(x, y)
             too_close = False
             # Check distance to all existing cars (players and other AIs)
@@ -158,7 +176,7 @@ def game_loop():
 
     health_pickup_spawn_timer = 0.0
     font_score = pygame.font.Font(None, 36)
-    font_coords = pygame.font.Font(None, COORD_FONT_SIZE) # NOUVEAU: Police pour les coordonnées
+    font_coords = pygame.font.Font(None, COORD_FONT_SIZE) # Police pour les coordonnées
 
     running = True
     while running:
@@ -232,8 +250,8 @@ def game_loop():
             health_pickup_spawn_timer = 0.0
             # Générer un point aléatoire sur l'écran
             # Ensure pickups don't spawn too close to walls
-            x = random.randint(spawn_min_x, spawn_max_x)
-            y = random.randint(spawn_min_y, spawn_max_y)
+            x = random.randint(ai_spawn_min_x, ai_spawn_max_x) # Utilise la zone de spawn des IA pour les bonus
+            y = random.randint(ai_spawn_min_y, ai_spawn_max_y)
             hp_value = random.randint(HEALTH_PICKUP_MIN_HP, HEALTH_PICKUP_MAX_HP)
             new_pickup = HealthPickup(x, y, hp_value)
             health_pickups.add(new_pickup)
@@ -264,21 +282,21 @@ def game_loop():
         for i, car in enumerate(player_cars):
             status = " (Disabled)" if car.is_disabled else ""
             score_text = font_score.render(f"P{i+1} ({car.color}): Score: {car.score} HP: {car.hp:.0f}{status}", True, car.color)
-            screen.blit(score_text, (10, score_y_offset + i * 30))
+            screen.blit(score_text, (10, score_y_offset + i * 40)) # Augmenté le décalage Y pour faire de la place aux coordonnées
             
-            # NOUVEAU: Affichage des coordonnées des joueurs dans le coin supérieur gauche
-            coord_text = font_coords.render(f"P{i+1} Coords: ({int(car.position.x)}, {int(car.position.y)})", True, car.color)
-            screen.blit(coord_text, (10, score_y_offset + i * 30 + 25)) # Décalé sous le score
+            # Affichage des coordonnées des joueurs dans le coin supérieur gauche
+            coord_text = font_coords.render(f"Coords: ({int(car.position.x)}, {int(car.position.y)})", True, car.color)
+            screen.blit(coord_text, (10, score_y_offset + i * 40 + 25)) # Décalé sous le score
 
         ai_score_y_offset = 10
         for i, car in enumerate(ai_cars):
             status = " (Disabled)" if car.is_disabled else ""
             score_text = font_score.render(f"AI {i+1} ({car.color}): Score: {car.score} HP: {car.hp:.0f}{status}", True, YELLOW)
-            screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 10, ai_score_y_offset + i * 30))
-
-            # NOUVEAU: Affichage des coordonnées des IA dans le coin supérieur droit
-            coord_text = font_coords.render(f"AI {i+1} Coords: ({int(car.position.x)}, {int(car.position.y)})", True, YELLOW)
-            screen.blit(coord_text, (SCREEN_WIDTH - coord_text.get_width() - 10, ai_score_y_offset + i * 30 + 25)) # Décalé sous le score
+            screen.blit(score_text, (SCREEN_WIDTH - score_text.get_width() - 10, ai_score_y_offset + i * 40)) # Augmenté le décalage Y
+            
+            # Affichage des coordonnées des IA dans le coin supérieur droit
+            coord_text = font_coords.render(f"Coords: ({int(car.position.x)}, {int(car.position.y)})", True, YELLOW)
+            screen.blit(coord_text, (SCREEN_WIDTH - coord_text.get_width() - 10, ai_score_y_offset + i * 40 + 25)) # Décalé sous le score
 
 
         pygame.display.flip()
