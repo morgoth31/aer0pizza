@@ -36,6 +36,7 @@ BULLET_SPEED = 500 # Speed of the bullet
 BULLET_RADIUS = 3 # Radius of the bullet (Reduced for more precision)
 BULLET_DAMAGE = 10 # Damage inflicted by a bullet
 CANNON_COOLDOWN = 0.5 # Cooldown time for the cannon in seconds
+MAX_BULLETS = 6  # Nombre maximum de balles que chaque voiture peut avoir
 
 # --- Collision Parameters ---
 COLLISION_ELASTICITY = 0.7 # Coefficient of restitution (0 = no bounce, 1 = perfect bounce)
@@ -45,6 +46,7 @@ COLLISION_DAMAGE_MULTIPLIER = 5.0 # Damage multiplier for car-on-car impacts
 WALL_DAMAGE_FACTOR = 500.0 # Damage taken when colliding with walls
 MIN_IMPACT_FORCE_FOR_DAMAGE = 500.0 # Minimum impact force threshold to inflict damage
 FRONT_IMPACT_THRESHOLD = 0.7 # Dot product threshold to determine a "front" impact
+
 
 # --- Game Parameters ---
 DISABLED_DURATION = 3.0 # Duration in seconds a car is disabled after destruction
@@ -82,3 +84,4 @@ COORD_FONT_SIZE = 18 # Font size for coordinates
 SOUND_COLLISION_PATH = "assets/collision.mp3" # Collision sound
 SOUND_MENU_SELECT_PATH = "assets/menu_select.mp3" # Menu selection sound
 SOUND_PICKUP_PATH = "assets/pickup.mp3" # Health pickup sound
+

@@ -69,6 +69,8 @@ class Car(pygame.sprite.Sprite):
         self.can_fire = True
         self.fire_cooldown_timer = 0.0
         self.fire_cooldown = CANNON_COOLDOWN
+        self.bullets_remaining = MAX_BULLETS  # Ajout du compteur de balles
+        self.max_bullets = MAX_BULLETS
 
         # État de désactivation après destruction
         self.is_disabled = False
@@ -172,14 +174,15 @@ class Car(pygame.sprite.Sprite):
 
 
     def fire_cannon(self):
-        """Tire une balle depuis le canon de la voiture."""
-        if self.can_fire and not self.is_disabled:
+        """Tire une balle depuis le canon de la voiture si des balles sont disponibles."""
+        if self.can_fire and not self.is_disabled and self.bullets_remaining > 0:
             self.can_fire = False
             self.fire_cooldown_timer = self.fire_cooldown
+            self.bullets_remaining -= 1  # Décrémente le compteur de balles
             
-            # Calculate bullet spawn position (slightly in front of the car)
+            # Calculate bullet spawn position
             forward_vector = pygame.math.Vector2(0, -1).rotate(self.angle)
-            spawn_offset = forward_vector * (CAR_LENGTH / 2 + BULLET_RADIUS + 5) # Offset from car center
+            spawn_offset = forward_vector * (CAR_LENGTH / 2 + BULLET_RADIUS + 5)
             bullet_pos = self.position + spawn_offset
             
             return Bullet(bullet_pos.x, bullet_pos.y, self.angle, self.color)

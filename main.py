@@ -445,12 +445,13 @@ def run_game_session(screen, player_count, ai_count, game_mode, difficulty):
         score_y_offset = 10
         for i, car in enumerate(player_cars):
             status = " (Disabled)" if car.is_disabled else ""
-            score_text = font_score.render(f"P{i+1} ({car.color}): Score: {car.score} HP: {car.hp:.0f}{status}", True, car.color)
-            screen.blit(score_text, (10, score_y_offset + i * 40)) # Augmenté le décalage Y pour faire de la place aux coordonnées
+            score_text = font_score.render(
+                f"P{i+1} ({car.color}): Score: {car.score} HP: {car.hp:.0f} Bullets: {car.bullets_remaining}/{car.max_bullets}{status}", 
+                True, car.color)
+            screen.blit(score_text, (10, score_y_offset + i * 40))
             
-            # Affichage des coordonnées des joueurs dans le coin supérieur gauche
             coord_text = font_coords.render(f"Coords: ({int(car.position.x)}, {int(car.position.y)})", True, car.color)
-            screen.blit(coord_text, (10, score_y_offset + i * 40 + 25)) # Décalé sous le score
+            screen.blit(coord_text, (10, score_y_offset + i * 40 + 25))
 
         ai_score_y_offset = 10
         for i, car in enumerate(ai_cars):
