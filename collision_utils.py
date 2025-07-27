@@ -68,37 +68,32 @@ def collide_car_wall_sat(car, wall):
     car_points = car.get_collision_polygon()
     wall_p1, wall_p2, wall_normal = wall.get_collision_line_segment()
 
-    axes = get_axes(car_points) + [wall_normal]
-
-    min_overlap = float('inf')
-    collision_normal = None
-
-    for axis in axes:
-        proj_car_min, proj_car_max = project_polygon(axis, car_points)
-        proj_wall_min = wall_p1.dot(axis)
-        proj_wall_max = wall_p2.dot(axis)
-        
-        if proj_wall_min > proj_wall_max:
-            proj_wall_min, proj_wall_max = proj_wall_max, proj_wall_min
-
-        overlap = max(0, min(proj_car_max, proj_wall_max) - max(proj_car_min, proj_wall_min))
-
-        if overlap == 0:
-            return False, None, None
-        
-        if overlap < min_overlap:
-            min_overlap = overlap
-            collision_normal = axis
-
-    car_center = sum(car_points, pygame.math.Vector2(0,0)) / len(car_points)
-    wall_center = (wall_p1 + wall_p2) / 2
+    # Convert wall segment to a "thick" polygon for SAT
+    wall_thickness = wall.thickness
+    wall_perp = pygame.math.Vector2(-wall_normal.y, wall_normal.x)
     
-    direction = wall_center - car_center
-    if collision_normal.dot(direction) < 0:
-        collision_normal *= -1
-
-    return True, collision_normal, min_overlap
-
+    # Create a polygon representing the thick wall
+    wall_poly = [
+        wall_p1 + wall_perp * wall_thickness/2,
+        wall_p2 + wall_perp * wall_thickness/2,
+        wall_p2 - wall_perp * wall_thickness/2,
+        wall_p1 - wall_perp * wall_thickness/2
+    ]
+    
+    # Use standard SAT between car polygon and wall polygon
+    collided, normal, penetration = collide_polygons_sat(car_points, wall_poly)
+    
+    if collided:
+        # Make sure normal points from car to wall
+        car_center = sum(car_points, pygame.math.Vector2(0,0)) / len(car_points)
+        wall_center = sum(wall_poly, pygame.math.Vector2(0,0)) / len(wall_poly)
+        direction = wall_center - car_center
+        if normal.dot(direction) < 0:
+            normal *= -1
+        
+        return True, normal, penetration
+    
+    return False, None, None
 
 def resolve_collision(obj1, obj2, normal, penetration):
     """
