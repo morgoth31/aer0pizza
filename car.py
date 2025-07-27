@@ -141,26 +141,39 @@ class Car(pygame.sprite.Sprite):
                 return # Don't target destroyed cars
 
             direction_to_target = target_obj.position - self.position
-            target_angle = math.degrees(math.atan2(-direction_to_target.y, direction_to_target.x))
             
-            target_angle = (90 - target_angle) % 360
-
-            angle_diff = (target_angle - self.angle + 180) % 360 - 180
-
-            if abs(angle_diff) > 5:
-                if angle_diff > 0:
-                    self.turning_right = True
-                else:
-                    self.turning_left = True
-            
-            if direction_to_target.length() > 100 and abs(angle_diff) < 45:
+            # If the target is very close, just try to ram it
+            if direction_to_target.length() < CAR_LENGTH * 2: # Within 2 car lengths
                 self.accelerating = True
-            
-            if direction_to_target.length() < 150 and self.velocity.length() > 50:
-                self.braking = True
-            
-            if self.velocity.length() < 10 and not self.accelerating and not self.braking:
-                self.accelerating = True
+                # No braking here, just ram
+            else:
+                # Calculate target angle
+                target_angle = math.degrees(math.atan2(-direction_to_target.y, direction_to_target.x))
+                target_angle = (90 - target_angle) % 360
+                angle_diff = (target_angle - self.angle + 180) % 360 - 180
+
+                # Turn towards target
+                if abs(angle_diff) > 2: # Smaller threshold for turning, more precise
+                    if angle_diff > 0:
+                        self.turning_right = True
+                    else:
+                        self.turning_left = True
+                
+                # Accelerate if generally facing the target (wider angle)
+                if abs(angle_diff) < 60: # Accelerate if target is within +/- 60 degrees
+                    self.accelerating = True
+                
+                # If AI is stuck or moving very slowly, try to accelerate and turn randomly to get unstuck
+                if self.velocity.length() < 10 and not self.accelerating: # If almost stopped and not trying to accelerate
+                    self.accelerating = True
+                    if random.random() < 0.5: # Random turn to try and get unstuck
+                        self.turning_left = True
+                    else:
+                        self.turning_right = True
+        else: # If no target, try to move forward a bit
+            self.accelerating = True
+            # Maybe add some random turning if no target to explore
+            if random.random() < 0.01: # Small chance to turn
                 if random.random() < 0.5:
                     self.turning_left = True
                 else:
@@ -236,6 +249,30 @@ class Car(pygame.sprite.Sprite):
 
         for i, point in enumerate(self.base_points):
             self.rotated_points[i] = point.rotate(self.angle) + self.position
+
+        # NOUVEAU: Limiter la voiture à l'écran et infliger des dégâts si collision avec les bords
+        collided_with_screen_edge = False
+        if self.position.x < 0:
+            self.position.x = 0
+            self.velocity.x *= -COLLISION_ELASTICITY
+            collided_with_screen_edge = True
+        elif self.position.x > SCREEN_WIDTH:
+            self.position.x = SCREEN_WIDTH
+            self.velocity.x *= -COLLISION_ELASTICITY
+            collided_with_screen_edge = True
+            
+        if self.position.y < 0:
+            self.position.y = 0
+            self.velocity.y *= -COLLISION_ELASTICITY
+            collided_with_screen_edge = True
+        elif self.position.y > SCREEN_HEIGHT:
+            self.position.y = SCREEN_HEIGHT
+            self.velocity.y *= -COLLISION_ELASTICITY
+            collided_with_screen_edge = True
+
+        if collided_with_screen_edge:
+            # Appliquer des dégâts si la voiture touche un bord de l'écran
+            self.take_damage(WALL_DAMAGE_FACTOR, self.position)
 
 
     def get_collision_polygon(self):
@@ -316,7 +353,6 @@ class Car(pygame.sprite.Sprite):
             temp_image.fill((255, 255, 255, 128), None, pygame.BLEND_RGBA_MULT) # Applique une transparence
             screen.blit(temp_image, self.rect)
         else:
-            # --- RETOUR À L'AFFICHAGE NORMAL DE LA VOITURE ---
             screen.blit(self.image, self.rect)
 
         # Dessiner la barre de vie (même si désactivée pour montrer le timer ou l'état)
@@ -335,5 +371,4 @@ class Car(pygame.sprite.Sprite):
         if self.is_disabled:
             font_timer = pygame.font.Font(None, 24)
             timer_text = font_timer.render(f"{self.disabled_timer:.1f}s", True, WHITE)
-            # CORRECTION: timer_timer -> timer_text
             screen.blit(timer_text, timer_text.get_rect(center=(self.rect.centerx, self.rect.top - 15)))
