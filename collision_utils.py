@@ -8,7 +8,16 @@ from constants import * # Import all constants
 # or use a type hint string "Car" and import only for type checking (from typing import TYPE_CHECKING).
 
 def project_polygon(axis, polygon_points):
-    """Projects a polygon onto an axis and returns the interval [min, max]."""
+    """
+    Projects a polygon onto an axis and returns the interval [min, max].
+
+    Args:
+        axis (pygame.math.Vector2): The axis to project onto.
+        polygon_points (list): A list of pygame.math.Vector2 objects representing the polygon's vertices.
+
+    Returns:
+        tuple: A tuple containing the minimum and maximum projection values.
+    """
     min_proj = float('inf')
     max_proj = float('-inf')
     for p in polygon_points:
@@ -18,7 +27,15 @@ def project_polygon(axis, polygon_points):
     return min_proj, max_proj
 
 def get_axes(polygon_points):
-    """Returns the normal axes to each edge of a polygon."""
+    """
+    Returns the normal axes to each edge of a polygon.
+
+    Args:
+        polygon_points (list): A list of pygame.math.Vector2 objects representing the polygon's vertices.
+
+    Returns:
+        list: A list of pygame.math.Vector2 objects representing the normal axes.
+    """
     axes = []
     for i in range(len(polygon_points)):
         p1 = polygon_points[i]
@@ -30,8 +47,16 @@ def get_axes(polygon_points):
 
 def collide_polygons_sat(poly1_points, poly2_points):
     """
-    Detects collision between two convex polygons using SAT.
-    Returns (True, normal, penetration) if collision, otherwise (False, None, None).
+    Detects collision between two convex polygons using the Separating Axis Theorem (SAT).
+
+    Args:
+        poly1_points (list): A list of pygame.math.Vector2 objects representing the vertices of the first polygon.
+        poly2_points (list): A list of pygame.math.Vector2 objects representing the vertices of the second polygon.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating if a collision occurred,
+               the collision normal (pygame.math.Vector2), and the penetration depth (float).
+               Returns (False, None, None) if there is no collision.
     """
     axes = get_axes(poly1_points) + get_axes(poly2_points)
     
@@ -62,8 +87,16 @@ def collide_polygons_sat(poly1_points, poly2_points):
 
 def collide_car_wall_sat(car, wall):
     """
-    Detects collision between a car (polygon) and a wall (line segment).
-    Returns (True, normal, penetration) if collision, otherwise (False, None, None).
+    Detects collision between a car (polygon) and a wall (line segment) using SAT.
+
+    Args:
+        car (Car): The car object.
+        wall (Wall): The wall object.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating if a collision occurred,
+               the collision normal (pygame.math.Vector2), and the penetration depth (float).
+               Returns (False, None, None) if there is no collision.
     """
     car_points = car.get_collision_polygon()
     wall_p1, wall_p2, wall_normal = wall.get_collision_line_segment()
@@ -98,10 +131,12 @@ def collide_car_wall_sat(car, wall):
 def resolve_collision(obj1, obj2, normal, penetration):
     """
     Resolves a collision between two objects (car-car or car-wall).
-    obj1: The first object (always a car for now).
-    obj2: The second object (car or wall).
-    normal: The collision normal (unit vector).
-    penetration: The penetration depth.
+
+    Args:
+        obj1 (Car): The first object (always a car).
+        obj2 (Car or Wall): The second object.
+        normal (pygame.math.Vector2): The collision normal (unit vector).
+        penetration (float): The penetration depth.
     """
     # Import Car here to avoid circular dependency at module level
     from car import Car 
