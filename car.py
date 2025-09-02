@@ -7,7 +7,19 @@ from collision_utils import resolve_collision # Import collision resolution func
 
 # --- Classe Bullet ---
 class Bullet(pygame.sprite.Sprite):
+    """
+    Represents a bullet fired by a car.
+    """
     def __init__(self, x, y, angle, owner_car_color):
+        """
+        Initializes a new Bullet object.
+
+        Args:
+            x (int): The x-coordinate of the bullet's starting position.
+            y (int): The y-coordinate of the bullet's starting position.
+            angle (float): The angle in degrees at which the bullet is fired.
+            owner_car_color (tuple): The color of the car that fired the bullet.
+        """
         super().__init__()
         self.position = pygame.math.Vector2(x, y)
         self.velocity = pygame.math.Vector2(0, -BULLET_SPEED).rotate(angle)
@@ -21,17 +33,43 @@ class Bullet(pygame.sprite.Sprite):
 
 
     def update(self, dt):
+        """
+        Updates the bullet's position.
+
+        Args:
+            dt (float): The time delta since the last frame.
+        """
         self.position += self.velocity * dt
         self.rect.center = (int(self.position.x), int(self.position.y))
 
     def draw(self, screen):
-        """Dessine la balle sur l'écran."""
+        """
+        Draws the bullet on the screen.
+
+        Args:
+            screen (pygame.Surface): The screen to draw the bullet on.
+        """
         pygame.draw.circle(screen, self.color, (int(self.position.x), int(self.position.y)), self.radius)
         pygame.draw.circle(screen, BLACK, (int(self.position.x), int(self.position.y)), self.radius, 1) # Contour
 
 # --- Classe Car ---
 class Car(pygame.sprite.Sprite):
+    """
+    Represents a car in the game.
+    """
     def __init__(self, x, y, angle=0, color=BLUE, is_player=True, game_mode=GAME_MODE_FREE_PLAY, difficulty=None):
+        """
+        Initializes a new Car object.
+
+        Args:
+            x (int): The x-coordinate of the car's starting position.
+            y (int): The y-coordinate of the car's starting position.
+            angle (float, optional): The initial angle of the car in degrees. Defaults to 0.
+            color (tuple, optional): The color of the car. Defaults to BLUE.
+            is_player (bool, optional): Whether the car is controlled by a player. Defaults to True.
+            game_mode (str, optional): The game mode. Defaults to GAME_MODE_FREE_PLAY.
+            difficulty (str, optional): The AI difficulty. Defaults to None.
+        """
         super().__init__()
         print(f"Creating Car: Color={color}, Player={is_player}, Initial Pos=({x}, {y}), Mode={game_mode}, Difficulty={difficulty}")
         self.original_image = self.create_pizza_slice_surface(CAR_WIDTH, CAR_LENGTH, color)
@@ -120,7 +158,17 @@ class Car(pygame.sprite.Sprite):
 
 
     def create_pizza_slice_surface(self, width, length, color):
-        """Crée une surface Pygame avec la forme d'une part de pizza."""
+        """
+        Creates a Pygame surface with the shape of a pizza slice.
+
+        Args:
+            width (int): The width of the pizza slice's base.
+            length (int): The length of the pizza slice.
+            color (tuple): The color of the pizza slice.
+
+        Returns:
+            pygame.Surface: A Pygame surface with the pizza slice shape.
+        """
         max_dim = max(width, length) * 2
         surface = pygame.Surface((max_dim, max_dim), pygame.SRCALPHA)
         
@@ -135,7 +183,16 @@ class Car(pygame.sprite.Sprite):
         return surface
 
     def handle_input(self, keys, player_num=1):
-        """Gère les inputs clavier pour contrôler la voiture."""
+        """
+        Handles keyboard input to control the car.
+
+        Args:
+            keys (pygame.key.get_pressed): The current state of the keyboard.
+            player_num (int, optional): The player number (1 or 2). Defaults to 1.
+
+        Returns:
+            Bullet or None: A new Bullet object if the car fires, otherwise None.
+        """
         if self.is_disabled: # Ne pas traiter les inputs si la voiture est désactivée
             self.accelerating = self.braking = self.turning_left = self.turning_right = False
             return None # No bullet fired
@@ -174,7 +231,12 @@ class Car(pygame.sprite.Sprite):
 
 
     def fire_cannon(self):
-        """Tire une balle depuis le canon de la voiture si des balles sont disponibles."""
+        """
+        Fires a bullet from the car's cannon if available.
+
+        Returns:
+            Bullet or None: A new Bullet object if a bullet is fired, otherwise None.
+        """
         if self.can_fire and not self.is_disabled and self.bullets_remaining > 0:
             self.can_fire = False
             self.fire_cooldown_timer = self.fire_cooldown
@@ -190,7 +252,17 @@ class Car(pygame.sprite.Sprite):
 
 
     def update_ai(self, target_obj, dt, track_waypoints=None):
-        """Logique d'IA simple pour la voiture."""
+        """
+        Simple AI logic for the car.
+
+        Args:
+            target_obj (pygame.sprite.Sprite): The target to follow or attack.
+            dt (float): The time delta since the last frame.
+            track_waypoints (list, optional): A list of waypoints for the AI to follow in race mode. Defaults to None.
+
+        Returns:
+            Bullet or None: A new Bullet object if the car fires, otherwise None.
+        """
         if self.is_disabled: # Ne pas traiter l'IA si la voiture est désactivée
             self.accelerating = self.braking = self.turning_left = self.turning_right = False
             return None # No bullet fired
@@ -301,7 +373,12 @@ class Car(pygame.sprite.Sprite):
 
 
     def apply_forces(self, dt):
-        """Calcule et applique les forces linéaires et les couples angulaires."""
+        """
+        Calculates and applies linear and angular forces to the car.
+
+        Args:
+            dt (float): The time delta since the last frame.
+        """
         forward_vector = pygame.math.Vector2(0, -1).rotate(self.angle)
 
         engine_force = pygame.math.Vector2(0, 0)
@@ -334,7 +411,12 @@ class Car(pygame.sprite.Sprite):
         self.angular_velocity *= 0.95
 
     def update_physics(self, dt):
-        """Met à jour la position et l'angle de la voiture en fonction de la physique."""
+        """
+        Updates the car's position and angle based on physics.
+
+        Args:
+            dt (float): The time delta since the last frame.
+        """
         # Update cannon cooldown
         if not self.can_fire:
             self.fire_cooldown_timer -= dt
@@ -378,12 +460,23 @@ class Car(pygame.sprite.Sprite):
 
 
     def get_collision_polygon(self):
-        """Retourne les sommets du polygone de collision de la voiture en coordonnées monde."""
+        """
+        Returns the vertices of the car's collision polygon in world coordinates.
+
+        Returns:
+            list: A list of pygame.math.Vector2 objects representing the polygon's vertices.
+        """
         return self.rotated_points
 
     def get_zone_from_impact_point(self, impact_point_world):
         """
-        Détermine la zone d'impact la plus probable basée sur le point d'impact.
+        Determines the most likely impact zone based on the impact point.
+
+        Args:
+            impact_point_world (pygame.math.Vector2): The impact point in world coordinates.
+
+        Returns:
+            str: The name of the impact zone ("front", "sides", or "rear").
         """
         distances = []
         for i, p in enumerate(self.rotated_points):
@@ -402,10 +495,12 @@ class Car(pygame.sprite.Sprite):
 
     def take_damage(self, impact_force, impact_point_world, attacker=None):
         """
-        Calcule et applique les dégâts à la voiture.
-        impact_force: La magnitude de la force d'impact.
-        impact_point_world: Le point de contact en coordonnées monde.
-        attacker: La voiture qui a infligé les dégâts (None pour les murs).
+        Calculates and applies damage to the car.
+
+        Args:
+            impact_force (float): The magnitude of the impact force.
+            impact_point_world (pygame.math.Vector2): The point of contact in world coordinates.
+            attacker (Car, optional): The car that inflicted the damage. Defaults to None.
         """
         if self.hp <= 0: # Si déjà détruite, ne prend pas plus de dégâts
             return
@@ -434,7 +529,12 @@ class Car(pygame.sprite.Sprite):
             self.collision_sound.play()
 
     def heal(self, amount):
-        """Soigne la voiture d'un certain montant de PV."""
+        """
+        Heals the car by a certain amount of HP.
+
+        Args:
+            amount (int): The amount of HP to heal.
+        """
         if self.hp <= 0: # Ne pas soigner une voiture désactivée
             return
         old_hp = self.hp
@@ -445,7 +545,12 @@ class Car(pygame.sprite.Sprite):
 
 
     def draw(self, screen):
-        """Dessine la voiture sur l'écran."""
+        """
+        Draws the car on the screen.
+
+        Args:
+            screen (pygame.Surface): The screen to draw the car on.
+        """
         if self.hp <= 0 and not self.is_disabled: # Ne pas dessiner si détruite et pas en phase de désactivation
             return
         

@@ -9,6 +9,16 @@ from collision_utils import collide_polygons_sat, collide_car_wall_sat, resolve_
 
 # --- Main Menu Function ---
 def main_menu(screen):
+    """
+    Displays the main menu and allows the user to select game options.
+
+    Args:
+        screen (pygame.Surface): The screen to draw the menu on.
+
+    Returns:
+        tuple: A tuple containing the selected player count, AI count, game mode, and difficulty.
+               Returns (None, None, None, None) if the user quits the game from the menu.
+    """
     font_title = pygame.font.Font(None, 74)
     font_options = pygame.font.Font(None, 48)
     
@@ -161,6 +171,19 @@ def main_menu(screen):
 
 # --- Main Game Loop Function (renamed to run_game_session) ---
 def run_game_session(screen, player_count, ai_count, game_mode, difficulty):
+    """
+    Runs the main game loop.
+
+    Args:
+        screen (pygame.Surface): The screen to draw the game on.
+        player_count (int): The number of human players.
+        ai_count (int): The number of AI opponents.
+        game_mode (str): The selected game mode ("free_play" or "race").
+        difficulty (str): The selected AI difficulty.
+
+    Returns:
+        bool: True if the user wants to return to the main menu, False if the user wants to quit.
+    """
     # Initialisation de l'écran et de l'horloge (déjà fait dans le bloc principal)
     pygame.display.set_caption(GAME_TITLE)
     clock = pygame.time.Clock()
