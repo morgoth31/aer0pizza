@@ -326,16 +326,16 @@ class Car(pygame.sprite.Sprite):
 
                 direction_to_target = target_obj.position - self.position
                 
+                # Calculate target angle so it's available for both movement and firing logic
+                target_angle = math.degrees(math.atan2(-direction_to_target.y, direction_to_target.x))
+                target_angle = (90 - target_angle) % 360
+                angle_diff = (target_angle - self.angle + 180) % 360 - 180
+
                 # If the target is very close, just try to ram it
                 if direction_to_target.length() < CAR_LENGTH * 2: # Within 2 car lengths
                     self.accelerating = True
                     # No braking here, just ram
                 else:
-                    # Calculate target angle
-                    target_angle = math.degrees(math.atan2(-direction_to_target.y, direction_to_target.x))
-                    target_angle = (90 - target_angle) % 360
-                    angle_diff = (target_angle - self.angle + 180) % 360 - 180
-
                     # Turn towards target
                     if abs(angle_diff) > 2: # Smaller threshold for turning, more precise
                         if angle_diff > 0:

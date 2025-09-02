@@ -494,7 +494,10 @@ def run_game_session(screen, player_count, ai_count, game_mode, difficulty):
 # --- Run the game ---
 if __name__ == "__main__":
     pygame.init()
-    pygame.mixer.init()
+    try:
+        pygame.mixer.init()
+    except pygame.error as e:
+        print(f"Warning: Could not initialize mixer: {e}")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     while True:
